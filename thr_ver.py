@@ -29,6 +29,12 @@ def save_data() :
                 os.mkdir(path+'\\RS485DATA')
                 w = csv.writer(f)
                 w.writerow([now, y[0]])
+                
+def write_data(ser) :
+    while th2.open :
+        data = input('Type your input : ')
+        data = (str(data)).encode()
+        ser.write(data)
 
 ser = serial.Serial(
     port = 'COM3', 
@@ -40,14 +46,16 @@ ser = serial.Serial(
 )
 
 th1 = threading.Thread(target=save_data)
+th2 = threading.Trread(target=write_data, args=(ser,))
 th1.open = True
+th2.open = True
 th1.start()
+th2.start()
 
 
 now = datetime.now()
 try :
-    while (start-now).seconds < 300 :
-        now = datetime.now()
+    while 1 :
         mcu_feedback = ser.read()
         que.put(mcu_feedback)
     ser.close()
